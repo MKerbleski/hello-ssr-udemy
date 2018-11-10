@@ -2,8 +2,10 @@
   "name": "hello-ssr-udemy",
   "version": "1.0.0",
   "description": "Test project for Server side rendering with react and redux",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "dev:server": "nodemon --watch build --exec node build/bundle.js",
+    "dev:build:server": "webpack --config webpack.server.js --watch"
   },
   "author": "Michael Kerbleski",
   "license": "ISC",

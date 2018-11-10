@@ -1,6 +1,9 @@
 const path = require('path');
+const merge = require('webpack-merge');
+const baseConfig = require('./webpack.base.js');
+const webpackNodeExternals = require('webpack-node-externals');
 
-module.exports = {
+const config  = {
 
     //inform webpack that were building a bundle for nodeJS, rather than for the browser. 
     target: 'node',
@@ -10,24 +13,10 @@ module.exports = {
     output: {
         filename: "bundle.js",
         path: path.resolve(__dirname, 'build'),//where we place build files -- __dirname is a refrence to the current working directory, build is a new folder automatically created. 
-    },
-    //tell webpack to run babel on every file it runs through which JSX file structure to javascriptES5
-    module: {
-        rules: [
-            {
-                test: /\.js?$/, //regex that tests filename to only apply babel to javascript files  
-                //when passes test 
-                loader: 'babel-loader',
-                exclude: /node_modules/, //regex -dont run babel over files in certain directories 
-                options: {
-                    presets: [ //rules to transpile code
-                        'react', //take react JSX and turn into normal function calls
-                        'stage-0', //handles async code 
-                        ['env', {targets: {browsers: ['last 2 versions']}}]
-                    ]
-                }
-            }
-        ]
-    }
+    }, 
+    //this module tells wepack not to bundle librarires at the point to the server if the library exists in the node modules server
+    externals: [webpackNodeExternals()]
 };
+//merge just combines webpack.server ans webpack.base into one.
+module.exports = merge(baseConfig, config);
 //create and export a config file for webpack to send down the line

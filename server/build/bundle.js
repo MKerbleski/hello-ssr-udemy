@@ -7017,23 +7017,22 @@ var _home2 = _interopRequireDefault(_home);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//this is necessary to mix syntaxes from home
-//root file for application
+//root file for application server side 
 
-// const express = require('express');
-// //wierd syntax but will change or make sense later
-// const React = require('react'); 
-// const renderToString = require('react-dom/server').renderToString;
-// const Home = require('./client/components/home').default;
+var app = (0, _express2.default)(); //this is necessary to mix syntaxes from home
 
-//convert require to statements to import statements 
-var app = (0, _express2.default)();
+
+app.use(_express2.default.static('public')); //this tells express that teh public folder is publicy availble (like to the user) to the outside world. 
 
 app.get('/', function (req, res) {
     var content = (0, _server.renderToString)(_react2.default.createElement(_home2.default, null));
     //JSX inside a node express server -- this is wierd 
 
-    res.send(content);
+    //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
+    //<script tag pulls rom the app.use ...public above. 
+    var html = '\n        <html>\n            <head></head>\n            <body>\n                <div id="root">' + content + '</div>\n                <script src="bundle.js"></script>\n            </body>\n        </html>\n    ';
+
+    res.send(html);
 });
 
 app.listen(3200, function () {
@@ -22151,7 +22150,18 @@ var Home = function Home() {
     return _react2.default.createElement(
         'div',
         null,
-        'I\'m the greatest home component'
+        _react2.default.createElement(
+            'div',
+            null,
+            'I\'m the greatest home component'
+        ),
+        _react2.default.createElement(
+            'button',
+            { onClick: function onClick() {
+                    return console.log('hi there');
+                } },
+            'press me'
+        )
     );
 };
 

@@ -1,24 +1,30 @@
-//root file for application
+//root file for application server side 
 
-// const express = require('express');
-// //wierd syntax but will change or make sense later
-// const React = require('react'); 
-// const renderToString = require('react-dom/server').renderToString;
-// const Home = require('./client/components/home').default;
-
-//convert require to statements to import statements 
 import express from 'express';
 import React from 'react';
-//this is necessary to mix syntaxes from home
-import { renderToString } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';//this is necessary to mix syntaxes from home
 import Home from './client/components/home'
 const app = express();
+
+app.use(express.static('public'));//this tells express that teh public folder is publicy availble (like to the user) to the outside world. 
 
 app.get('/', (req, res) => {
     const content = renderToString(<Home />);
     //JSX inside a node express server -- this is wierd 
 
-    res.send(content);
+    //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
+    //<script tag pulls rom the app.use ...public above. 
+    const html = `
+        <html>
+            <head></head>
+            <body>
+                <div id="root">${content}</div>
+                <script src="bundle.js"></script>
+            </body>
+        </html>
+    `;
+
+    res.send(html);
 });
 
 app.listen(3200, () => {

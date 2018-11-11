@@ -1,16 +1,19 @@
 //this file will rendere our react app and return a string
 import React from 'react';
 import { renderToString } from 'react-dom/server';//this is necessary to mix syntaxes from home
+import { Provider } from 'react-redux';
 import { StaticRouter } from 'react-router-dom';
 import Routes from '../client/Routes';
 
-export default req => {
+export default (req, store )=> {
     console.log('renderer.js')
     //context is a required prop, used to handle redirects and error handling. 
     const content = renderToString(
-      <StaticRouter location={req.path} context={{}}>
-        <Routes />
-      </StaticRouter>
+        <Provider store={store}>
+            <StaticRouter location={req.path} context={{}}>
+                <Routes />
+            </StaticRouter>
+        </Provider>
   );
     //replaced home route with staticRouter
 

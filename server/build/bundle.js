@@ -90,17 +90,21 @@ var _renderer = __webpack_require__(4);
 
 var _renderer2 = _interopRequireDefault(_renderer);
 
+var _createStore = __webpack_require__(8);
+
+var _createStore2 = _interopRequireDefault(_createStore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//root file for application server side 
-
-var app = (0, _express2.default)();
+var app = (0, _express2.default)(); //root file for application server side 
 
 app.use(_express2.default.static('public'));
 //this tells express that teh public folder is publicy availble (like to the user) to the outside world. 
 
 app.get('*', function (req, res) {
-    res.send((0, _renderer2.default)(req));
+    var store = (0, _createStore2.default)();
+    //some logic to initilize and load data into the store
+    res.send((0, _renderer2.default)(req, store));
 });
 
 app.listen(3200, function () {
@@ -121,7 +125,7 @@ module.exports = require("express");
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _react = __webpack_require__(0);
@@ -129,6 +133,8 @@ var _react = __webpack_require__(0);
 var _react2 = _interopRequireDefault(_react);
 
 var _server = __webpack_require__(5);
+
+var _reactRedux = __webpack_require__(11);
 
 var _reactRouterDom = __webpack_require__(1);
 
@@ -138,22 +144,25 @@ var _Routes2 = _interopRequireDefault(_Routes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//this is necessary to mix syntaxes from home
-//this file will rendere our react app and return a string
-exports.default = function (req) {
-  console.log('renderer.js');
-  //context is a required prop, used to handle redirects and error handling. 
-  var content = (0, _server.renderToString)(_react2.default.createElement(
-    _reactRouterDom.StaticRouter,
-    { location: req.path, context: {} },
-    _react2.default.createElement(_Routes2.default, null)
-  ));
-  //replaced home route with staticRouter
+exports.default = function (req, store) {
+    console.log('renderer.js');
+    //context is a required prop, used to handle redirects and error handling. 
+    var content = (0, _server.renderToString)(_react2.default.createElement(
+        _reactRedux.Provider,
+        { store: store },
+        _react2.default.createElement(
+            _reactRouterDom.StaticRouter,
+            { location: req.path, context: {} },
+            _react2.default.createElement(_Routes2.default, null)
+        )
+    ));
+    //replaced home route with staticRouter
 
-  //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
-  //<script tag pulls rom the app.use ...public above. 
-  return '\n    <html>\n      <head></head>\n      <body>\n        <div id="root">' + content + '</div>\n        <script src="bundle.js"></script>\n      </body>\n    </html>\n  ';
-};
+    //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
+    //<script tag pulls rom the app.use ...public above. 
+    return '\n    <html>\n      <head></head>\n      <body>\n        <div id="root">' + content + '</div>\n        <script src="bundle.js"></script>\n      </body>\n    </html>\n  ';
+}; //this is necessary to mix syntaxes from home
+//this file will rendere our react app and return a string
 
 /***/ }),
 /* 5 */
@@ -233,6 +242,50 @@ var Home = function Home() {
 };
 
 exports.default = Home;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _redux = __webpack_require__(9);
+
+var _reduxThunk = __webpack_require__(10);
+
+var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//this is the client side store
+exports.default = function () {
+    var store = (0, _redux.createStore)(reducers, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+
+    return store;
+};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = require("redux");
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+module.exports = require("redux-thunk");
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-redux");
 
 /***/ })
 /******/ ]);

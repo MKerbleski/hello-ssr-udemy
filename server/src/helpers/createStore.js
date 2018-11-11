@@ -1,6 +1,7 @@
 //this is the client side store
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
+import reducers from '../client/reducers';
 
 export default () => {
     const store = createStore(reducers, {}, applyMiddleware(thunk));

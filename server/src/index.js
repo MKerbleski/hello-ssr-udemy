@@ -1,5 +1,5 @@
 //root file for application server side 
-
+import 'babel-polyfill'; //necessary for async await 
 import express from 'express';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';

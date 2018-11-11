@@ -1,6 +1,6 @@
 //root entry of our client side codebase , no server routes...
 //can treat this as a normal react app 
-
+import 'babel-polyfill'; //necessary for async await 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
@@ -9,6 +9,7 @@ import Routes from './Routes';
 import thunk from 'redux-thunk';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
+import reducers from './reducers';
 
 const store = createStore(reducers, {}, applyMiddleware(thunk))
 

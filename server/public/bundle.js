@@ -2973,19 +2973,26 @@ var _reactRedux = __webpack_require__(107);
 
 var _reactRouterConfig = __webpack_require__(474);
 
+var _axios = __webpack_require__(127);
+
+var _axios2 = _interopRequireDefault(_axios);
+
 var _reducers = __webpack_require__(124);
 
 var _reducers2 = _interopRequireDefault(_reducers);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//root entry of our client side codebase , no server routes...
-//can treat this as a normal react app 
-var store = (0, _redux.createStore)(_reducers2.default, window.INITIAL_STATE, (0, _redux.applyMiddleware)(_reduxThunk2.default));
-//window.INITIAL_STATE is replaces empty object to set state to what it was from the server side
-
 //redux libraries 
 //necessary for async await 
+var axiosInstance = _axios2.default.create({
+    baseURL: '/api'
+}); //root entry of our client side codebase , no server routes...
+//can treat this as a normal react app 
+
+
+var store = (0, _redux.createStore)(_reducers2.default, window.INITIAL_STATE, (0, _redux.applyMiddleware)(_reduxThunk2.default.withExtraArgument(axiosInstance)));
+//window.INITIAL_STATE is replaces empty object to set state to what it was from the server side
 _reactDom2.default.hydrate(_react2.default.createElement(
     _reactRedux.Provider,
     { store: store },
@@ -25651,6 +25658,10 @@ var _HomePage = __webpack_require__(482);
 
 var _HomePage2 = _interopRequireDefault(_HomePage);
 
+var _App = __webpack_require__(485);
+
+var _App2 = _interopRequireDefault(_App);
+
 var _UsersListPage = __webpack_require__(483);
 
 var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
@@ -25660,12 +25671,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // import AdminsListPage, { loadData } from './pages/AdminsListPage';
 
 //necessary for SSR
-exports.default = [_extends({}, _HomePage2.default, {
-  // pulls the component out of the HomePage object. equivilent of component: 'Homepage' from before
-  path: '/',
-  exact: true
-}), _extends({}, _UsersListPage2.default, {
-  path: '/users'
+exports.default = [_extends({}, _App2.default, {
+  routes: [
+  //nested routes
+  _extends({}, _HomePage2.default, {
+    // pulls the component out of the HomePage object. equivilent of component: 'Homepage' from before
+    path: '/',
+    exact: true
+  }), _extends({}, _UsersListPage2.default, {
+    path: '/users'
+  })]
 })];
 
 //OLD JSX way which will not work with Redux 
@@ -28534,28 +28549,24 @@ exports.default = function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.fetchUsers = exports.FETCH_USERS = undefined;
-
-var _axios = __webpack_require__(127);
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+// import axios from 'axios';
+//use axios for other api calls that is not my server
 
 var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
 
 var fetchUsers = exports.fetchUsers = function fetchUsers() {
     return function () {
-        var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch) {
+        var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
             var res;
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
                         case 0:
                             _context.next = 2;
-                            return _axios2.default.get('http://react-ssr-api.herokuapp.com/users/');
+                            return api.get('/users/');
 
                         case 2:
                             res = _context.sent;
@@ -28574,7 +28585,7 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
             }, _callee, undefined);
         }));
 
-        return function (_x) {
+        return function (_x, _x2, _x3) {
             return _ref.apply(this, arguments);
         };
     }();
@@ -39094,6 +39105,45 @@ exports.default = {
     loadData: loadData, //or just loadData would work but expanded for clarity, 
     component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
 
+};
+
+/***/ }),
+/* 484 */,
+/* 485 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterConfig = __webpack_require__(474);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var App = function App(_ref) {
+  var route = _ref.route;
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(
+      'h1',
+      null,
+      'Im a header'
+    ),
+    (0, _reactRouterConfig.renderRoutes)(route.routes)
+  );
+};
+
+exports.default = {
+  component: App
 };
 
 /***/ })

@@ -1,6 +1,7 @@
 //root file for application server side 
 import 'babel-polyfill'; //necessary for async await 
 import express from 'express';
+import proxy from 'express-http-proxy';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
 import { matchRoutes } from 'react-router-config';
@@ -8,12 +9,21 @@ import Routes from './client/Routes'
 
 const app = express();
 
+app.use('/api', proxy('http://react-ssr-api.herokuappp.com', {
+    proxyReqOptDecorator(opts){
+        opts.headers['x-forwarded-host'] = 'localhost:3200';
+        return opts;
+    }
+}));
+//^^any attempt to hit server that starts with api will be split off into a proxy to fullfil request. only put second optino for other sites
+
 app.use(express.static('public'));
 //this tells express that teh public folder is publicy availble (like to the user) to the outside world. 
 
 app.get('*', (req, res) => {
-    const store = createStore();
-    //some logic to initilize and load data into the store
+    //req includes cookie
+    const store = createStore(req);
+    
 
     //take incoming request path and look at route config and only render necessary components   
     //also alows you to see component that needs to be rendered without rendering it

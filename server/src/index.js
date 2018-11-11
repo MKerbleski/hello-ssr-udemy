@@ -3,6 +3,8 @@ import 'babel-polyfill'; //necessary for async await
 import express from 'express';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
+import { matchRoutes } from 'react-router-config';
+import Routes from './client/Routes'
 
 const app = express();
 
@@ -12,7 +14,22 @@ app.use(express.static('public'));
 app.get('*', (req, res) => {
     const store = createStore();
     //some logic to initilize and load data into the store
-    res.send(renderer(req, store));
+
+    //take incoming request path and look at route config and only render necessary components   
+    //also alows you to see component that needs to be rendered without rendering it
+    const promises = matchRoutes(Routes, req.path).map(({ route }) =>  {
+    //^^ promises is an array with a promise(s) of how far the fetches are in loading
+        return route.loadData ? route.loadData(store) : null;
+        //^^ route.loadData(store) is refrence to serverside redux store
+    });
+    //^^map envokes load data for every component 
+    //(({ route})) is destructuring
+    
+    //promise.all takes an array of promises and returns the combined promises as one promise once all promises in array are resolved.
+    Promise.all(promises).then(() => {
+        res.send(renderer(req, store));
+    });
+
   });
 
 app.listen(3200, () => {

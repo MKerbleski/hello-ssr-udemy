@@ -96,6 +96,12 @@ var _createStore = __webpack_require__(8);
 
 var _createStore2 = _interopRequireDefault(_createStore);
 
+var _reactRouterConfig = __webpack_require__(18);
+
+var _Routes = __webpack_require__(6);
+
+var _Routes2 = _interopRequireDefault(_Routes);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //root file for application server side 
@@ -108,7 +114,23 @@ app.use(_express2.default.static('public'));
 app.get('*', function (req, res) {
     var store = (0, _createStore2.default)();
     //some logic to initilize and load data into the store
-    res.send((0, _renderer2.default)(req, store));
+
+    //take incoming request path and look at route config and only render necessary components   
+    //also alows you to see component that needs to be rendered without rendering it
+    var promises = (0, _reactRouterConfig.matchRoutes)(_Routes2.default, req.path).map(function (_ref) {
+        var route = _ref.route;
+
+        //^^ promises is an array with a promise(s) of how far the fetches are in loading
+        return route.loadData ? route.loadData(store) : null;
+        //^^ route.loadData(store) is refrence to serverside redux store
+    });
+    //^^map envokes load data for every component 
+    //(({ route})) is destructuring
+
+    //promise.all takes an array of promises and returns the combined promises as one promise once all promises in array are resolved.
+    Promise.all(promises).then(function () {
+        res.send((0, _renderer2.default)(req, store));
+    });
 });
 
 app.listen(3200, function () {
@@ -129,7 +151,7 @@ module.exports = require("express");
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _react = __webpack_require__(0);
@@ -142,6 +164,12 @@ var _reactRedux = __webpack_require__(11);
 
 var _reactRouterDom = __webpack_require__(1);
 
+var _reactRouterConfig = __webpack_require__(18);
+
+var _serializeJavascript = __webpack_require__(23);
+
+var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
+
 var _Routes = __webpack_require__(6);
 
 var _Routes2 = _interopRequireDefault(_Routes);
@@ -149,23 +177,29 @@ var _Routes2 = _interopRequireDefault(_Routes);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function (req, store) {
-    console.log('renderer.js');
-    //context is a required prop, used to handle redirects and error handling. 
-    var content = (0, _server.renderToString)(_react2.default.createElement(
-        _reactRedux.Provider,
-        { store: store },
-        _react2.default.createElement(
-            _reactRouterDom.StaticRouter,
-            { location: req.path, context: {} },
-            _react2.default.createElement(_Routes2.default, null)
-        )
-    ));
-    //replaced home route with staticRouter
+  // console.log('renderer.js')
+  //context is a required prop, used to handle redirects and error handling. 
+  var content = (0, _server.renderToString)(_react2.default.createElement(
+    _reactRedux.Provider,
+    { store: store },
+    _react2.default.createElement(
+      _reactRouterDom.StaticRouter,
+      { location: req.path, context: {} },
+      _react2.default.createElement(
+        'div',
+        null,
+        (0, _reactRouterConfig.renderRoutes)(_Routes2.default)
+      )
+    )
+  ));
+  //replaced home route with staticRouter
 
-    //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
-    //<script tag pulls rom the app.use ...public above. 
-    return '\n    <html>\n      <head></head>\n      <body>\n        <div id="root">' + content + '</div>\n        <script src="bundle.js"></script>\n      </body>\n    </html>\n  ';
-}; //this is necessary to mix syntaxes from home
+  //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
+  //<script tag pulls rom the app.use ...public above. 
+  return '\n    <html>\n      <head></head>\n      <body>\n        <div id="root">' + content + '</div>\n        <script>\n          window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n        </script>\n        <script src="bundle.js"></script>\n      </body>\n    </html>\n  ';
+};
+//^^ takes a string and takes out script tags and such ... by taking greater and lesser and making them into unicode
+//this is necessary to mix syntaxes from home
 //this file will rendere our react app and return a string
 
 /***/ }),
@@ -185,76 +219,46 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRouterDom = __webpack_require__(1);
-
-var _Home = __webpack_require__(7);
-
-var _Home2 = _interopRequireDefault(_Home);
-
-var _UsersList = __webpack_require__(16);
-
-var _UsersList2 = _interopRequireDefault(_UsersList);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//this will be a shared resource between client and server side
-
-exports.default = function () {
-  return _react2.default.createElement(
-    'div',
-    null,
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Home2.default }),
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/hi', component: function component() {
-        return "hi";
-      } }),
-    _react2.default.createElement(_reactRouterDom.Route, { path: '/users', component: _UsersList2.default })
-  );
-};
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; //this will be a shared resource between client and server side
 
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _HomePage = __webpack_require__(21);
+
+var _HomePage2 = _interopRequireDefault(_HomePage);
+
+var _UsersListPage = __webpack_require__(22);
+
+var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Home = function Home() {
-    console.log('home.js');
-    return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
-            'div',
-            null,
-            'I\'m the greatest home component'
-        ),
-        _react2.default.createElement(
-            'button',
-            { onClick: function onClick() {
-                    return console.log('hi there');
-                } },
-            'press me'
-        )
-    );
-};
+// import AdminsListPage, { loadData } from './pages/AdminsListPage';
 
-exports.default = Home;
+//necessary for SSR
+exports.default = [_extends({}, _HomePage2.default, {
+  // pulls the component out of the HomePage object. equivilent of component: 'Homepage' from before
+  path: '/',
+  exact: true
+}), _extends({}, _UsersListPage2.default, {
+  path: '/users'
+})];
+
+//OLD JSX way which will not work with Redux 
+// export default () => {
+//     return (
+//       <div>
+//         <Route exact path="/" component={Home} />
+//         <Route exact path="/hi" component={() => "hi"} />
+//         <Route path="/users" component={UsersList} />
+//       </div>
+//     );
+//   };
 
 /***/ }),
+/* 7 */,
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -380,7 +384,7 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
                     switch (_context.prev = _context.next) {
                         case 0:
                             _context.next = 2;
-                            return _axios2.default.get('http://react-ssr-api.herokuapp.com/users');
+                            return _axios2.default.get('http://react-ssr-api.herokuapp.com/users/');
 
                         case 2:
                             res = _context.sent;
@@ -412,7 +416,64 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
 module.exports = require("axios");
 
 /***/ }),
-/* 16 */
+/* 16 */,
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = require("babel-polyfill");
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-config");
+
+/***/ }),
+/* 19 */,
+/* 20 */,
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Home = function Home() {
+    console.log('home.js');
+    return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+            'div',
+            null,
+            'I\'m the greatest home component'
+        ),
+        _react2.default.createElement(
+            'button',
+            { onClick: function onClick() {
+                    return console.log('hi there');
+                } },
+            'press me'
+        )
+    );
+};
+
+exports.default = {
+    component: Home
+};
+//different cause Routes needs a loaddata and a component. Cleans up
+
+/***/ }),
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -453,6 +514,7 @@ var UsersList = function (_Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             this.props.fetchUsers();
+            //this is necessary if user routes to other page, otherwise redundant 
         }
     }, {
         key: 'renderUsers',
@@ -488,13 +550,21 @@ function mapStateToProps(state) {
     return { users: state.users };
 }
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
+function loadData(store) {
+    return store.dispatch((0, _actions.fetchUsers)());
+}
+
+exports.default = {
+    loadData: loadData, //or just loadData would work but expanded for clarity, 
+    component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
+
+};
 
 /***/ }),
-/* 17 */
+/* 23 */
 /***/ (function(module, exports) {
 
-module.exports = require("babel-polyfill");
+module.exports = require("serialize-javascript");
 
 /***/ })
 /******/ ]);

@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fetchUsers } from '../actions';
 
+
 class UsersList extends Component {
     componentDidMount(){
         this.props.fetchUsers();
+        //this is necessary if user routes to other page, otherwise redundant 
     }
 
     renderUsers(){
@@ -27,4 +29,12 @@ function mapStateToProps(state){
     return { users: state.users };
 }
 
-export default connect(mapStateToProps, { fetchUsers })(UsersList);
+function loadData(store){
+    return store.dispatch(fetchUsers());
+}
+
+export default {
+    loadData: loadData, //or just loadData would work but expanded for clarity, 
+    component: connect(mapStateToProps, { fetchUsers })(UsersList)
+
+};

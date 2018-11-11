@@ -10,4 +10,7 @@ const Home = () => {
     );   
 };
 
-export default Home;
+export default {
+    component: Home 
+};
+//different cause Routes needs a loaddata and a component. Cleans up 

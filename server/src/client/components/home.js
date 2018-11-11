@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Home = () => {
+    console.log('home.js')
     return (
         <div>
             <div>I'm the greatest home component</div>

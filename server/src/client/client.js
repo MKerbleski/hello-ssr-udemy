@@ -3,7 +3,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Home from './components/home';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './Routes';
 
-ReactDOM.hydrate(<Home />, document.querySelector('#root') );//needs to get rendered into the same div that is already on page from index.js linked through 'root'.
+ReactDOM.hydrate(
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>,
+  document.querySelector('#root')
+);
+    //needs to get rendered into the same div that is already on page from index.js linked through 'root'.
 //use hydrate instead of render
+//user browser router to incorporate routes

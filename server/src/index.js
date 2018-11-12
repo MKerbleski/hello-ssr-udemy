@@ -30,8 +30,15 @@ app.get('*', (req, res) => {
     const promises = matchRoutes(Routes, req.path).map(({ route }) =>  {
     //^^ promises is an array with a promise(s) of how far the fetches are in loading
         return route.loadData ? route.loadData(store) : null;
-        //^^ route.loadData(store) is refrence to serverside redux store
-    });
+        //^^ route.loadData(store) is refrence to serverside redux stor e
+    }).map(promise => {
+        if (promise) {
+            return new Promise((res, rej) => {
+                promise.then(res).catch(res);
+                //always resolve inner promise
+            })
+        }
+    })
     //^^map envokes load data for every component 
     //(({ route})) is destructuring
     
@@ -39,14 +46,22 @@ app.get('*', (req, res) => {
     Promise.all(promises).then(() => {
         const context = {};
         const content = renderer(req, store, context);
+        
+        if(context.url){
+            return res.redirect(301, context.url)
+        }
+
         if (context.notFound){
             //can be used for other status codes
             res.status(404);
             //ok to send seperate
         }
         res.send(content);
-    });
-
+    })
+    //bad approach because not specific
+    // .catch(err => {
+    //     res.send('40something ')
+    // })
   });
 
 app.listen(3000, () => {

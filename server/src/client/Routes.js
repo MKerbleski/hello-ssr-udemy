@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import App from './App'
 import UsersListPage from './pages/UsersListPage';
-// import AdminsListPage, { loadData } from './pages/AdminsListPage';
+import AdminsListPage from './pages/AdminsListPage';
 
 //necessary for SSR
 export default [
@@ -18,6 +18,10 @@ export default [
         // pulls the component out of the HomePage object. equivilent of component: 'Homepage' from before
         path: '/',
         exact: true
+      },
+      {
+        ...AdminsListPage, 
+        path: '/admins'
       },
       {
         ...UsersListPage, 

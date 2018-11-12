@@ -7,6 +7,7 @@ import { renderRoutes } from 'react-router-config';
 import serialize from 'serialize-javascript';
 //^^ takes a string and takes out script tags and such ... by taking greater and lesser and making them into unicode
 import Routes from '../client/Routes';
+import { Helmet } from 'react-helmet';
 
 export default (req, store, context)=> {
     // console.log('renderer.js')
@@ -20,13 +21,19 @@ export default (req, store, context)=> {
             </StaticRouter>
         </Provider>
   );
-    //replaced home route with staticRouter
+    //^^replaced home route with staticRouter
+
+    const helmet =  Helmet.renderStatic();
+    //helmet will be an object that we rendered on pages
 
     //all of this is necessary just to include the script tag so that the client has access to the functionality of the site and not exclusivly the visuals that just sending <Home> would give. 1st package to is for visual and the second is for the bundle. so page will load and then have functionality.
     //<script tag pulls rom the app.use ...public above. 
     return `
     <html>
-      <head></head>
+      <head>
+        ${helmet.title.toString()}
+        ${helmet.meta.toString()}
+      </head>
       <body>
         <div id="root">${content}</div>
         <script>

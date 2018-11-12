@@ -8,12 +8,12 @@ import serialize from 'serialize-javascript';
 //^^ takes a string and takes out script tags and such ... by taking greater and lesser and making them into unicode
 import Routes from '../client/Routes';
 
-export default (req, store )=> {
+export default (req, store, context)=> {
     // console.log('renderer.js')
     //context is a required prop, used to handle redirects and error handling. 
     const content = renderToString(
         <Provider store={store}>
-            <StaticRouter location={req.path} context={{}}>
+            <StaticRouter location={req.path} context={context}>
                 {/* <Routes /> old way  */} 
                 <div>{renderRoutes(Routes)}</div>
                 {/* takes array of route objects and turns them into route components, but this way also benifits the clientside as well somehow, i think */}

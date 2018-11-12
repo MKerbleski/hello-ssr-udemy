@@ -2,6 +2,7 @@
 
 import React from 'react';
 import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import App from './App'
 import UsersListPage from './pages/UsersListPage';
 // import AdminsListPage, { loadData } from './pages/AdminsListPage';
@@ -21,6 +22,9 @@ export default [
       {
         ...UsersListPage, 
         path: '/users'
+      },
+      {
+        ...NotFoundPage, 
       }
     ]
   }

@@ -9,9 +9,9 @@ import Routes from './client/Routes'
 
 const app = express();
 
-app.use('/api', proxy('http://react-ssr-api.herokuappp.com', {
+app.use('/api', proxy('http://react-ssr-api.herokuapp.com', {
     proxyReqOptDecorator(opts){
-        opts.headers['x-forwarded-host'] = 'localhost:3200';
+        opts.headers['x-forwarded-host'] = 'localhost:3000';
         return opts;
     }
 }));
@@ -37,11 +37,18 @@ app.get('*', (req, res) => {
     
     //promise.all takes an array of promises and returns the combined promises as one promise once all promises in array are resolved.
     Promise.all(promises).then(() => {
-        res.send(renderer(req, store));
+        const context = {};
+        const content = renderer(req, store, context);
+        if (context.notFound){
+            //can be used for other status codes
+            res.status(404);
+            //ok to send seperate
+        }
+        res.send(content);
     });
 
   });
 
-app.listen(3200, () => {
-    console.log('\n -- server running on 3200');
+app.listen(3000, () => {
+    console.log('\n -- server running on 3000');
 });
